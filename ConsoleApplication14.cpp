@@ -16,8 +16,8 @@ void help();
 void start();
 void showCards(int vector[7]);
 void decodificare(int carte);
-void incheiere(int playerCards[11], int compCards[11]);
-
+void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti]);
+void win();
 void shuffle(int carti[52])
 {
 	int i, j,l, nrShuffles, aux;
@@ -64,6 +64,7 @@ void start()
 	unsigned int money = 100, compmoney = 100, bid, sum;
 	sum = 0;
 	int playerCards[6], compCards[6];
+	bool isUnder21 = true;
 
 	for (int i = 0; i <= 5; i++)
 	{
@@ -90,24 +91,64 @@ void start()
 	compCards[1] = carti[3];
 
 	showCards(playerCards);
-	cout << "mai tragi o carte? (Y/N)\n";
-	cin >> c;
-	if (c == 'Y'|| c=='y')
+	int sumaPlayer = 0;
+	int l = 0;
+	//facem suma cartilor
+	while (playerCards[l] != -1)
 	{
-		playerCards[2] = carti[k];
-		k++;
-
-		showCards(playerCards);
+		if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
+		else sumaPlayer = sumaPlayer + playerCards[l] / 4;
+		l++;
 	}
-	else if (c == 'N' || c== 'n')
+	cout << sumaPlayer << endl;
+	cout << "tragi o carte? (Y/N)\n";
+	cin >> c;
+	isUnder21 = true;
+	int pozUrmCarte = 2;
+	
+	while ((c == 'Y' || c == 'Y') && isUnder21==true)
 	{
-		incheiere(playerCards, compCards);
+		l = 0;
+		while (playerCards[l] != -1)//face suma
+		{
+			if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
+			else sumaPlayer = sumaPlayer + playerCards[l] / 4;
+			l++;
+		}
+		cout << sumaPlayer<<endl;
+		//se mai pune o carte in mana jucatorului
+		playerCards[pozUrmCarte] = carti[k];
+		k++;
+		showCards(playerCards);
+
+		if (sumaPlayer == 21)
+		{
+			win();
+			isUnder21 = false;//ca sa se opreasca
+		}
+		else if (sumaPlayer > 21) isUnder21 = false;
+		else
+		{
+			cout << "tragi o carte? (Y/N)\n";
+			cin >> c;
+			pozUrmCarte++;
+		}
+
+	}
+	if (c == 'n' || c == 'N')
+	{
+		cout << "ai ajuns la nu";
+	}
+
+	if (c == 'N' || c== 'n')
+	{
+		incheiere(playerCards, compCards,carti);
 	}
 
 	
 }
 
-void incheiere(int playerCards[11], int compCards[11])
+void incheiere(int playerCards[11], int compCards[11],int carti[52])
 {
 	int sumaPlayer, sumaComp;
 	sumaPlayer = 0;
@@ -116,15 +157,39 @@ void incheiere(int playerCards[11], int compCards[11])
 
 	while (playerCards[i] != -1)
 	{
-		if (playerCards[i]/4 == 10)sumaPlayer = sumaPlayer + 12;
-		else if (playerCards[i]/4 == 11)sumaPlayer = sumaPlayer + 13;
-		else if (playerCards[i]/4 == 12)sumaPlayer = sumaPlayer + 14;
-		else if (sumaPlayer + 11 > 21 && playerCards[i] / 4 == 0) sumaPlayer++;
+		if (playerCards[i]/4 >= 10)sumaPlayer = sumaPlayer + 10;
 		else sumaPlayer = sumaPlayer + playerCards[i] / 4;
 		i++;
 	}
 	showCards(playerCards);
 	cout << "totalul tau: " << sumaPlayer << endl;
+
+	sumaComp = 0;
+
+	i = 0;
+
+	while (compCards[i] != -1)
+	{
+		if (compCards[i] / 4 >= 10)sumaComp = sumaComp + 10;
+		else sumaComp = sumaComp + compCards[i] / 4;
+		i++;
+	}
+	showCards(compCards);
+
+	int k = 2;
+	while (sumaComp < 17)
+	{
+		compCards[i] = carti[k];
+		if (compCards[i] / 4 < 10) sumaComp = sumaComp + compCards[1] / 4 + 1;
+		else sumaComp = sumaComp + 10;
+		i++;
+		k++;
+		
+	}
+	cout << "totalul lui: " << sumaComp << endl;
+	if (sumaComp > 21) cout << "player wins";
+	else if (sumaPlayer > sumaComp) cout << "player wins";
+	else cout << "comp wins";
 }
 void showCards(int vector[52])
 {
@@ -138,6 +203,10 @@ void showCards(int vector[52])
 	cout << endl;
 }
 
+void win()
+{
+	cout << endl << "Ai castigat!";
+}
 void decodificare(int carte)
 {
 	if(carte<10)cout << carte / 4 + 1 << " de ";
