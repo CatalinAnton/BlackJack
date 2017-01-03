@@ -5,6 +5,10 @@
 #include<iostream>
 #include<string>
 #include<string.h>
+#include<fstream>
+
+
+
 
 using namespace std;
 
@@ -16,8 +20,13 @@ void help();
 void start();
 void showCards(int vector[7]);
 void decodificare(int carte);
-void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti]);
-void win();
+void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti], int sumaPlayer);
+void win(int $money, int bid);
+void lose(int $compmoney, int bid);
+
+int money = 100;
+int compmoney = 100;
+int bid;
 void shuffle(int carti[52])
 {
 	int i, j,l, nrShuffles, aux;
@@ -39,157 +48,254 @@ void shuffle(int carti[52])
 }
 void help()
 {
-	cout << "nananananana";
-	cout << "apasa start ca sa icnepi jocul\n";
+	cout << "nananananana\n";
 
 };
 void menu()
 {
 	char option[20];
-	cout << "This is BlackJack! You are in the menu now" << endl << "type help for more information!"<<endl;
+	
 	cin.getline(option, 20);
 
 	if (strcmp(option, "help")==0) {
 		help();
 		cout << "a intrat in help";
+	}else if (strcmp(option, "start") == 0) start();
+
+	else
+	{
+		cout << "don't know what's that. Want to try again?";
+		menu();
 	}
-	if (strcmp(option, "start") == 0) start();
 	
 
 }
 void start()
 {
-	char name[25], c;
-	int carti[52], k = 4;
-	unsigned int money = 100, compmoney = 100, bid, sum;
-	sum = 0;
+	char name[25], c,continua='n';
+	int carti[52], k = 4,as;
 	int playerCards[6], compCards[6];
-	bool isUnder21 = true;
 
-	for (int i = 0; i <= 5; i++)
-	{
-		playerCards[i] = -1;
-		compCards[i] = -1;
-	}
 	cout << endl << "Give us your name!" << endl;
 	cin.getline(name, 25);
+	do {
 
-	cout << "you have " << money << " bucks! how much do you want to bid?";
-	cin >> bid;
+		shuffle(carti);
+		//de aici incepe
+		bool isUnder21 = true;
+		//initializeaza mainile jucatorilor
+		for (int i = 0; i <= 5; i++)
+		{
+			playerCards[i] = -1;
+			compCards[i] = -1;
+		}
+		
 
-	money = money - bid;
-	compmoney = compmoney - bid;
+		cout << "you have " << money << " bucks! how much do you want to bid?";
+		cin >> bid;
 
-	sum = bid * 2;
+		money = money - bid;
+		compmoney = compmoney - bid;
 
-	shuffle(carti);
-	shuffle(carti);
-	//init carti
-	playerCards[0] = carti[0];
-	playerCards[1] = carti[1];
-	compCards[0] = carti[2];
-	compCards[1] = carti[3];
+		bid = bid * 2;
 
-	showCards(playerCards);
-	int sumaPlayer = 0;
-	int l = 0;
-	//facem suma cartilor
-	while (playerCards[l] != -1)
-	{
-		if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
-		else sumaPlayer = sumaPlayer + playerCards[l] / 4;
-		l++;
-	}
-	cout << sumaPlayer << endl;
-	cout << "tragi o carte? (Y/N)\n";
-	cin >> c;
-	isUnder21 = true;
-	int pozUrmCarte = 2;
-	
-	while ((c == 'Y' || c == 'Y') && isUnder21==true)
-	{
+		shuffle(carti);
+		shuffle(carti);
+		//init carti
+		playerCards[0] = carti[0];
+		playerCards[1] = carti[1];
+		compCards[0] = carti[2];
+		compCards[1] = carti[3];
+
+		showCards(playerCards);
+		int sumaPlayer = 0;
+		int l = 0;
+		//facem suma cartilor
 		l = 0;
+		as = 0;
 		while (playerCards[l] != -1)//face suma
 		{
 			if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
-			else sumaPlayer = sumaPlayer + playerCards[l] / 4;
+			else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
+			else
+			{
+				as = 1;
+				sumaPlayer++;
+			}
 			l++;
 		}
-		cout << sumaPlayer<<endl;
-		//se mai pune o carte in mana jucatorului
-		playerCards[pozUrmCarte] = carti[k];
-		k++;
-		showCards(playerCards);
-
+		if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
+		cout << sumaPlayer << endl;
 		if (sumaPlayer == 21)
 		{
-			win();
-			isUnder21 = false;//ca sa se opreasca
+			cout << "Ai castigat!\n";
+			money = money + bid;
 		}
-		else if (sumaPlayer > 21) isUnder21 = false;
 		else
 		{
+			sumaPlayer = 0;
 			cout << "tragi o carte? (Y/N)\n";
 			cin >> c;
-			pozUrmCarte++;
+			isUnder21 = true;
+			int pozUrmCarte = 2;
+			k = 4;
+			while ((c == 'y' || c == 'Y') && isUnder21 == true)
+			{
+
+				cout << sumaPlayer << endl;
+				//se mai pune o carte in mana jucatorului
+				playerCards[pozUrmCarte] = carti[k];
+				k++;
+				pozUrmCarte++;
+				showCards(playerCards);
+
+				l = 0;
+				as = 0;
+				sumaPlayer = 0;//ultima modificare
+				while (playerCards[l] != -1)//face suma
+				{
+					if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
+					else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
+					else
+					{
+						as = 1;
+						sumaPlayer++;
+					}
+					l++;
+				}
+				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
+				showCards(playerCards);
+				cout << "\ncsuma: " << sumaPlayer;
+				if (sumaPlayer == 21)
+				{
+					cout << "ai castigat!\n";
+					money = money + bid;
+					isUnder21 = false;//ca sa se opreasca
+					//return
+				}
+				else if (sumaPlayer > 21)
+				{
+					isUnder21 = false;
+					cout << "ai pierdut!\n";
+					compmoney = compmoney + bid;
+					//return
+				}
+				else
+				{
+					cout << "tragi o carte? (Y/N)\n";
+					cin >> c;
+				}
+
+			}
+			if (c == 'n' || c == 'N')
+			{
+				cout << "ai ajuns la nu";
+				incheiere(playerCards, compCards, carti,sumaPlayer);
+			}
 		}
-
-	}
-	if (c == 'n' || c == 'N')
-	{
-		cout << "ai ajuns la nu";
-	}
-
-	if (c == 'N' || c== 'n')
-	{
-		incheiere(playerCards, compCards,carti);
-	}
-
-	
+		//aici se incheie
+		if (money > 0)
+		{
+			cout << "mai joci?(Y/N)" << endl;
+			cin >> continua;
+		}
+		else {
+			continua = 'n';
+			cout << "sorry, you have no money left :<";
+			}
+	} while (continua == 'y' || continua == 'Y');
 }
 
-void incheiere(int playerCards[11], int compCards[11],int carti[52])
+void lose(int $compmoney, int bid)
 {
-	int sumaPlayer, sumaComp;
-	sumaPlayer = 0;
+	cout << "Ai pierdut!";
+	compmoney = compmoney + bid;
+}
+void win(int $money, int $compmoney, int bid)
+{
+	cout << endl << "Ai castigat!";
+	money = money + bid;
+
+}
+void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPlayer)
+{
+	int sumaComp;
+	
+	int asc;
 
 	int i = 0;
-
-	while (playerCards[i] != -1)
+	/*
+	int l = 0;
+	int as = 0;
+	while (playerCards[l] != -1)//face suma
 	{
-		if (playerCards[i]/4 >= 10)sumaPlayer = sumaPlayer + 10;
-		else sumaPlayer = sumaPlayer + playerCards[i] / 4;
-		i++;
+		if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
+		else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
+		else
+		{
+			as = 1;
+			sumaPlayer++;
+		}
+		l++;
 	}
+	if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
 	showCards(playerCards);
+	*/
 	cout << "totalul tau: " << sumaPlayer << endl;
 
 	sumaComp = 0;
 
 	i = 0;
-
+	asc = 0;
 	while (compCards[i] != -1)
 	{
 		if (compCards[i] / 4 >= 10)sumaComp = sumaComp + 10;
-		else sumaComp = sumaComp + compCards[i] / 4;
+		else if (compCards[i] / 4 != 0)sumaComp = sumaComp + compCards[i] / 4 + 1;
+		else
+		{
+			asc = 1;
+			sumaComp++;
+		}
 		i++;
 	}
+	if (sumaComp + 10 <= 21 && asc == 1) sumaComp = sumaComp + 10;
+	cout << "cartile comp-----";
 	showCards(compCards);
 
 	int k = 2;
 	while (sumaComp < 17)
 	{
 		compCards[i] = carti[k];
-		if (compCards[i] / 4 < 10) sumaComp = sumaComp + compCards[1] / 4 + 1;
+		if (compCards[i] / 4 < 10) sumaComp = sumaComp + compCards[i] / 4 + 1;
 		else sumaComp = sumaComp + 10;
 		i++;
 		k++;
 		
 	}
+	showCards(compCards);
 	cout << "totalul lui: " << sumaComp << endl;
-	if (sumaComp > 21) cout << "player wins";
-	else if (sumaPlayer > sumaComp) cout << "player wins";
-	else cout << "comp wins";
+	if (sumaComp > 21)
+	{
+		cout << "ai castigat!\n";
+		money = money + bid;
+	}
+	else if((sumaComp > sumaPlayer && sumaComp<21 && sumaPlayer<21) || sumaComp==21)
+	{
+		
+		cout << "ai pierdut!\n";
+		compmoney = compmoney + bid;
+	}
+	else if (sumaComp == sumaPlayer && sumaComp < 21)
+	{
+		cout << "egal!\n";
+		money = money + bid/2;
+		compmoney = compmoney + bid / 2;
+	}
+	else
+	{
+		cout << "ai castigat!\n";
+		money = money + bid;
+	}
 }
 void showCards(int vector[52])
 {
@@ -203,13 +309,10 @@ void showCards(int vector[52])
 	cout << endl;
 }
 
-void win()
-{
-	cout << endl << "Ai castigat!";
-}
+
 void decodificare(int carte)
 {
-	if(carte<10)cout << carte / 4 + 1 << " de ";
+	if(carte/4<10)cout << carte / 4 + 1 << " de ";
 	else cout<< carte / 4 + 2 << " de ";
 	switch (carte % 4)
 	{
@@ -226,6 +329,7 @@ void decodificare(int carte)
 		cout << " romb ";
 		break;
 	default: cout << "nu exista simbolul asta";
+		break;
 	}
 
 	cout << endl;
@@ -239,7 +343,7 @@ int main()
 	for (i = 0; i < nrCarti; i++)
 		cout << carti[i] << " ";
 	cout << endl;
-
+	cout << "This is BlackJack! You are in the menu now" << endl << "type help for more information!" << endl;
 	menu();
 	cin >> n;
 
