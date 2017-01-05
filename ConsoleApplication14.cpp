@@ -29,7 +29,7 @@ int compmoney = 1000;
 int bid;
 void shuffle(int carti[52])
 {
-	int i, j,l, nrShuffles, aux;
+	int i, j,l, nrShuffles, aux,cartiAux[52],k;
 	nrShuffles = 3;
 
 	for (i = 0; i <= nrCarti - 1; i++)
@@ -45,6 +45,44 @@ void shuffle(int carti[52])
 			carti[l] = aux;
 
 		}
+	i = 0;
+	l = 25;
+	k = 0;
+	int aleatoriu;
+	while (i <= 24 && l <= 51)
+	{
+		aleatoriu = rand() % 2;
+		if (aleatoriu == 0)
+		{
+			cartiAux[k] = carti[i];
+			i++;
+			k++;
+		}
+		else
+		{
+			cartiAux[k] = carti[l];
+			l++;
+			k++;
+		}
+		
+	}
+	while (i <= 24)
+	{
+		cartiAux[k] = carti[i];
+		i++;
+		k++;
+	}
+	while (l <= 51)
+	{
+		cartiAux[k] = carti[l];
+		l++;
+		k++;
+	}
+
+	for (i = 0; i <= 51; i++)
+	{
+		carti[i] = cartiAux[i];
+	}
 }
 void help()
 {
@@ -195,6 +233,22 @@ void start()
 			if (c == 'n' || c == 'N')
 			{
 				cout << "ai ajuns la nu";
+				//facem suma cartilor
+				sumaPlayer = 0;
+				l = 0;
+				as = 0;
+				while (playerCards[l] != -1)//face suma
+				{
+					if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
+					else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
+					else
+					{
+						as = 1;
+						sumaPlayer++;
+					}
+					l++;
+				}
+				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
 				incheiere(playerCards, compCards, carti,sumaPlayer,name);
 			}
 		}
@@ -227,6 +281,7 @@ void registerLogin(char name[25])
 			cout << "welcome back, " << x << "! you have ";
 			getline(read, y);
 			cout << y << "bucks !";
+			write << y << endl;
 			money = std::stoi(y);
 			found = true;
 		}
@@ -235,11 +290,12 @@ void registerLogin(char name[25])
 	{
 		cout << "you are new here. I just registered you. Now you have 1000 bucks";
 		money = 1000;
-		while (!read.eof())
+		/*while (!read.eof())
 		{
 			getline(read, y);
 			write << y << endl;
 		}
+		*/
 		write << x << endl << 1000;
 	}
 	read.close();
@@ -257,13 +313,13 @@ void update(char name[25], int money)
 	while (!read.eof())
 	{
 		getline(read, y);
-		write << y << endl;
+		if(!y.empty())write << y << endl;
 
 		if (y == x)
 		{
 
 			getline(read, y);
-			write << money << endl;;
+			write << money << endl;
 
 		}
 	}
