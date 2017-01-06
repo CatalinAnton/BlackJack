@@ -8,10 +8,20 @@
 #include<fstream>
 
 
-
 using namespace std;
 
 #define nrCarti 52
+struct jucator
+{
+	int bani;
+	string name;
+};
+struct node
+{
+	int money;
+	string name;
+	node *next;
+};
 
 void menu();
 void shuffle(unsigned int carti[52]);
@@ -19,14 +29,22 @@ void help();
 void start();
 void showCards(int vector[7]);
 void decodificare(int carte);
-void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti], int sumaPlayer,char name[25]);
+void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti], int sumaPlayer,char name[25], int nivel);
 void win(int $money, int bid);
 void lose(int $compmoney, int bid);
 void registerLogin(char name[25]);
 void update(char name[25], int money);
-int money = 100;
+void addList(node *head, jucator player);
+void showList(node *head);
+void scoreboard();
+void quicksort(jucator *players, int left, int right);
+void swap(int i, int j, jucator *a);
+
+int money = 1000;
 int compmoney = 1000;
 int bid;
+int pstand = 0;
+int phit = 0;
 void shuffle(int carti[52])
 {
 	int i, j,l, nrShuffles, aux,cartiAux[52],k;
@@ -92,20 +110,28 @@ void help()
 void menu()
 {
 	char option[20];
-	
+	do{
 	cin.getline(option, 20);
 
-	if (strcmp(option, "help")==0) {
+	if (strcmp(option, "help")==0)
+		{
 		help();
 		cout << "a intrat in help";
-	}else if (strcmp(option, "start") == 0) start();
+		}
+	else if (strcmp(option, "start") == 0) start();
 
 	else if (strcmp(option, "exit") == 0) return;
+	else if (strcmp(option, "score") == 0) scoreboard();
+	else if (strcmp(option, "n") == 0 || strcmp(option, "N") == 0)
+	{
+		cout << "wtf" << endl;
+	}
 	else
 	{
-		cout << "don't know what's that. Want to try again?";
-		menu();
+		cout << "You are in the menu now! What do you wish to do?(start | help | score | exit)"<<endl;
 	}
+
+	} while (strcmp(option, "exit") != 0);
 	
 
 }
@@ -113,12 +139,28 @@ void menu()
 void start()
 {
 	char name[25], c,continua='n';
-	int carti[52], k = 4,as;
+	int carti[52], k = 4,as,nivel=1;
 	int playerCards[6], compCards[6];
 
 	cout << endl << "Give us your name!" << endl;
 	cin.getline(name, 25);
 	registerLogin(name);
+	do
+	{
+		cout << "Choose the difficulty level! (1-easy | 2-medium | 3-hard)" << endl;
+		cin >> nivel;
+	} while (!(nivel > 0 && nivel < 4));
+		switch (nivel)
+		{
+		case 1:
+			compmoney = 1000;
+			break;
+		case 2:
+			compmoney = money;
+			break;
+		case 3:
+			compmoney = money*2;
+		}
 	do {
 
 		shuffle(carti);
@@ -131,7 +173,7 @@ void start()
 			compCards[i] = -1;
 		}
 		
-
+		cout << "the dealer has " << compmoney << " bucks" << endl;
 		cout << "you have " << money << " bucks! how much do you want to bid?";
 		cin >> bid;
 
@@ -182,7 +224,7 @@ void start()
 			k = 4;
 			while ((c == 'y' || c == 'Y') && isUnder21 == true)
 			{
-
+				phit++;
 				cout << sumaPlayer << endl;
 				//se mai pune o carte in mana jucatorului
 				playerCards[pozUrmCarte] = carti[k];
@@ -233,6 +275,7 @@ void start()
 			if (c == 'n' || c == 'N')
 			{
 				cout << "ai ajuns la nu";
+				pstand++;
 				//facem suma cartilor
 				sumaPlayer = 0;
 				l = 0;
@@ -249,19 +292,25 @@ void start()
 					l++;
 				}
 				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
-				incheiere(playerCards, compCards, carti,sumaPlayer,name);
+				incheiere(playerCards, compCards, carti,sumaPlayer,name,nivel);
 			}
 		}
 		//aici se incheie
-		if (money > 0)
+		if (money > 0 && compmoney>0)
 		{
 			cout << "mai joci?(Y/N)" << endl;
 			cin >> continua;
 		}
-		else {
+		else if(money<=0){
 			continua = 'n';
-			cout << "sorry, you have no money left :<";
+			cout << "sorry, you have no money left :<"<<endl;
+			return;
 			}
+		else
+		{
+			continua = 'n';
+			cout << "Congratulations! You won! The computer has no money left" << endl;
+		}
 	} while (continua == 'y' || continua == 'Y');
 }
 
@@ -339,7 +388,7 @@ void win(int $money, int $compmoney, int bid)
 	money = money + bid;
 
 }
-void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPlayer, char name[25])
+void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPlayer, char name[25], int nivel)
 {
 	int sumaComp;
 	
@@ -383,16 +432,99 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 	if (sumaComp + 10 <= 21 && asc == 1) sumaComp = sumaComp + 10;
 	cout << "cartile comp-----";
 	showCards(compCards);
-
 	int k = 2;
-	while (sumaComp < 17)
+	switch (nivel)
 	{
-		compCards[i] = carti[k];
-		if (compCards[i] / 4 < 10) sumaComp = sumaComp + compCards[i] / 4 + 1;
-		else sumaComp = sumaComp + 10;
-		i++;
-		k++;
+	case 1://easy
+		int trage;
+		trage = rand() % 2;
+		while (trage == 1)
+		{
+			compCards[i] = carti[k];
+			if (compCards[i] / 4 < 10) sumaComp = sumaComp + compCards[i] / 4 + 1;
+			else sumaComp = sumaComp + 10;
+			i++;
+			k++;
+
+			trage = rand() % 2;
+			if (sumaComp > 21) trage = 0;
+		}
+		break;
+	case 2://nivel mediu
 		
+		while (sumaComp < 17)
+		{
+			compCards[i] = carti[k];
+			if (compCards[i] / 4 < 10)
+				sumaComp = sumaComp + compCards[i] / 4 + 1;
+			else sumaComp = sumaComp + 10;
+			i++;
+			k++;
+
+		}
+		break;
+	case 3://hard
+		int magic = 0;
+		if (sumaPlayer == 20)
+		{
+			while (sumaComp < 20)
+			{
+				compCards[i] = carti[k];
+				if (compCards[i] / 4 < 10)
+				{
+					sumaComp = sumaComp + compCards[i] / 4 + 1;
+					if (compCards[i] / 4 == 0) magic = 1;
+				}
+				else sumaComp = sumaComp + 10;
+				if (sumaComp + 10 < 21 && magic == 1)
+				{
+					sumaComp = sumaComp + 10;
+				}
+				i++;
+				k++;
+
+			}
+		}
+		else if (sumaPlayer == 19)
+		{
+			while (sumaComp < 19)
+			{
+				compCards[i] = carti[k];
+				if (compCards[i] / 4 < 10)
+				{
+					sumaComp = sumaComp + compCards[i] / 4 + 1;
+					if (compCards[i] / 4 == 0) magic = 1;
+				}
+				else sumaComp = sumaComp + 10;
+				if (sumaComp + 10 < 21 && magic == 1)
+				{
+					sumaComp = sumaComp + 10;
+				}
+				i++;
+				k++;
+
+			}
+		}
+		else
+		{
+			while (sumaPlayer > sumaComp)
+			{
+				compCards[i] = carti[k];
+				if (compCards[i] / 4 < 10)
+				{
+					sumaComp = sumaComp + compCards[i] / 4 + 1;
+					if (compCards[i] / 4 == 0) magic = 1;
+				}
+				else sumaComp = sumaComp + 10;
+				if (sumaComp + 10 < 21 && magic == 1)
+				{
+					sumaComp = sumaComp + 10;
+				}
+				i++;
+				k++;
+			}
+		}
+
 	}
 	showCards(compCards);
 	cout << "totalul lui: " << sumaComp << endl;
@@ -459,11 +591,139 @@ void decodificare(int carte)
 
 	cout << endl;
 }
+
+void scoreboard()
+{
+	node *head;
+	jucator players[500];
+	ifstream read("players.txt");
+	jucator aux;
+	int k, j, i = 0;
+	int ok = 0;
+	string y;
+	while (!read.eof())
+	{
+		getline(read, y);
+		if (!y.empty() && ok == 0)
+		{
+			players[i].name = y;
+			ok = 1;
+		}
+		else if (!y.empty())
+		{
+			players[i].bani = std::stoi(y);
+			ok = 0;
+			i++;
+		}
+
+	}
+	i--;
+	k = i;
+
+
+	read.close();
+	//quicksort(players, 0, k-1);
+
+	for (i = 0; i <= k - 1; i++)
+		for (j = i + 1; j <= k; j++)
+		{
+			if (players[j].bani > players[i].bani)
+			{
+				aux = players[i];
+				players[i] = players[j];
+				players[j] = aux;
+			}
+		}
+
+
+	head = new node;
+	head->next = NULL;
+	head->money = players[0].bani;
+	head->name = players[0].name;
+
+	i = 0;
+	i++;
+	while (i <= k)
+	{
+		addList(head, players[i]);
+		i++;
+	}
+
+	showList(head);
+}
+void addList(node *head, jucator player)
+{
+	node *current;
+	node *parcurgere;
+	current = new node;
+	current->money = player.bani;
+	current->name = player.name;
+	current->next = NULL;
+
+	parcurgere = head;
+	while (parcurgere->next != NULL)
+	{
+		parcurgere = parcurgere->next;
+	}
+	parcurgere->next = current;
+}
+
+void showList(node *head)
+{
+	node *parcurgere;
+	parcurgere = head;
+	int i = 1;
+	while (parcurgere != NULL)
+	{
+		cout << i << ". " << parcurgere->name << " " << parcurgere->money << endl;
+		parcurgere = parcurgere->next;
+		i++;
+	}
+}
+
+void swap(int i, int j, jucator *a) {
+	jucator temp = a[i];
+	a[i] = a[j];
+	a[j] = temp;
+}
+
+
+void quicksort(jucator *players, int left, int right) {
+	int min = (left + right) / 2;
+	cout << "QS:" << left << "," << right << "\n";
+
+	int i = left;
+	int j = right;
+	int pivot = players[min].bani;
+
+	while (left<j || i<right)
+	{
+		while (players[i].bani<pivot)
+			i++;
+		while (players[j].bani>pivot)
+			j--;
+
+		if (i <= j) {
+			swap(i, j, players);
+			i++;
+			j--;
+		}
+		else {
+			if (left<j)
+				quicksort(players, left, j);
+			if (i<right)
+				quicksort(players, i, right);
+			return;
+		}
+	}
+}
+
+
 int main()
 {
 	 int carti[52];
 	shuffle(carti);
-	int n, i;
+	int i;
 
 	for (i = 0; i < nrCarti; i++)
 		cout << carti[i] << " ";
