@@ -39,12 +39,14 @@ void showList(node *head);
 void scoreboard();
 void quicksort(jucator *players, int left, int right);
 void swap(int i, int j, jucator *a);
+void updateHistory(string data);
 
 int money = 1000;
 int compmoney = 1000;
 int bid;
-int pstand = 0;
-int phit = 0;
+
+string history=" ";
+
 void shuffle(int carti[52])
 {
 	int i, j,l, nrShuffles, aux,cartiAux[52],k;
@@ -141,7 +143,7 @@ void start()
 	char name[25], c,continua='n';
 	int carti[52], k = 4,as,nivel=1;
 	int playerCards[6], compCards[6];
-
+	char *data = " ";
 	cout << endl << "Give us your name!" << endl;
 	cin.getline(name, 25);
 	registerLogin(name);
@@ -224,7 +226,6 @@ void start()
 			k = 4;
 			while ((c == 'y' || c == 'Y') && isUnder21 == true)
 			{
-				phit++;
 				cout << sumaPlayer << endl;
 				//se mai pune o carte in mana jucatorului
 				playerCards[pozUrmCarte] = carti[k];
@@ -275,7 +276,6 @@ void start()
 			if (c == 'n' || c == 'N')
 			{
 				cout << "ai ajuns la nu";
-				pstand++;
 				//facem suma cartilor
 				sumaPlayer = 0;
 				l = 0;
@@ -300,16 +300,48 @@ void start()
 		{
 			cout << "mai joci?(Y/N)" << endl;
 			cin >> continua;
+			if (continua == 'n' || continua == 'N')
+			{
+				//concatenare
+				history = history + name;
+				history = history + " left the game. Bucks now: ";
+				history = history + std::to_string(money);
+				history = history + " difficulty: ";
+				history = history + std::to_string(nivel);
+				cout << history;
+				updateHistory(history);
+				history = " ";
+				return;
+			}
 		}
 		else if(money<=0){
 			continua = 'n';
+			//concatenare
 			cout << "sorry, you have no money left :<"<<endl;
+			history = history + name;
+			history = history + "lost! No money left. Bucks now:";
+			history= history + std::to_string(money);
+			history = history + "difficulty: ";
+			history = history + std::to_string(nivel);
+
+			updateHistory(history);
+			history = " ";
+			//strcat(history, nivel);
 			return;
 			}
 		else
 		{
 			continua = 'n';
 			cout << "Congratulations! You won! The computer has no money left" << endl;
+			history = history + name;
+			history = history + "Won! The computer has no money left. Bucks now:";
+			history = history + std::to_string(money);
+			history = history + "difficulty: ";
+			history = history + std::to_string(nivel);
+
+			updateHistory(history);
+			history = " ";
+			
 		}
 	} while (continua == 'y' || continua == 'Y');
 }
@@ -718,6 +750,24 @@ void quicksort(jucator *players, int left, int right) {
 	}
 }
 
+ifstream reader("gamesHistory.txt");
+ofstream writer("tempgames.txt");
+void updateHistory(string history)
+{
+	string y;
+	while (!reader.eof())
+	{
+		getline(reader, y);
+		if(!y.empty())writer << y << endl;//aci
+	}
+
+	writer << history << endl;
+	reader.close();
+	writer.close();
+	remove("gamesHistory.txt");
+	rename("tempGames.txt", "gamesHistory.txt");
+
+}
 
 int main()
 {
