@@ -27,7 +27,7 @@ void menu();
 void shuffle(unsigned int carti[52]);
 void help();
 void start();
-void showCards(int vector[7]);
+void showCards(int vector[7], int player);
 void decodificare(int carte);
 void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti], int sumaPlayer,char name[25], int nivel);
 void win(int $money, int bid);
@@ -40,6 +40,7 @@ void scoreboard();
 void quicksort(jucator *players, int left, int right);
 void swap(int i, int j, jucator *a);
 void updateHistory(string data);
+void about();
 
 int money = 1000;
 int compmoney = 1000;
@@ -106,7 +107,36 @@ void shuffle(int carti[52])
 }
 void help()
 {
-	cout << "nananananana\n";
+	cout << endl;
+	cout << "  ---------------------------------------------  " << endl;
+	cout << " |             This is Blackjack!!             | " << endl;
+	cout << " |___________________RULES:____________________| " << endl;
+	cout << " |     The goal of the game is to have less    | " << endl;
+	cout << " |   or exactly 21 points. The closer you are  | " << endl;
+	cout << " |             to 21, the better!              | " << endl;
+	cout << " |---------------------------------------------| " << endl;
+	cout << " | o Ace can be 1 or 11                        | " << endl;
+	cout << " | o Blackjack or Winning Hand:                | " << endl;
+	cout << " | (You get the double amount of what you bid) | " << endl;
+	cout << " | o If Dealer gets Blackjack:                 | " << endl;
+	cout << " |   - Player loses what he bets               | " << endl;
+	cout << " | o If Dealer's score beats Player's score:   | " << endl;
+	cout << " |   - Player loses what he bets               | " << endl;
+	cout << " | o Push (Tie Score):                         | " << endl;
+	cout << " |   - Regain your initial betting amount      | " << endl;
+	cout << " |---------------------------------------------|  " << endl;
+	cout << " | Scoreboard -                                | " << endl;
+	cout << " | o You are ranked based on total money.      | " << endl;
+	cout << " | o A rank of 0 means that you haven't played.| " << endl;
+	cout << " |---------------------------------------------|  " << endl;
+	cout << " | Game logs -                                 | " << endl;
+	cout << " | o After you finish a game, it is saved      | " << endl;
+	cout << " |   in a database so later you can show       | " << endl;
+	cout << " |   your Blackjack skills to your mom         | " << endl;
+	cout << " |---------------------------------------------|  " << endl;
+	cout << " |                                             | " << endl;
+	cout << " |_____________________________________________| " << endl << endl; cout << endl;
+
 
 };
 void menu()
@@ -114,11 +144,12 @@ void menu()
 	char option[20];
 	do{
 	cin.getline(option, 20);
+	
 
 	if (strcmp(option, "help")==0)
 		{
 		help();
-		cout << "a intrat in help";
+
 		}
 	else if (strcmp(option, "start") == 0) start();
 
@@ -128,14 +159,13 @@ void menu()
 	{
 		cout << "wtf" << endl;
 	}
-	else
-	{
-		cout << "You are in the menu now! What do you wish to do?(start | help | score | exit)"<<endl;
-	}
-
+	else if (strcmp(option, "about") == 0) about();
+	else {
+		cout << "You are in the menu now! What do you wish to do?\n(start | help | score | exit)" << endl;
+		}
 	} while (strcmp(option, "exit") != 0);
 	
-
+	
 }
 
 void start()
@@ -151,7 +181,8 @@ void start()
 	{
 		cout << "Choose the difficulty level! (1-easy | 2-medium | 3-hard)" << endl;
 		cin >> nivel;
-	} while (!(nivel > 0 && nivel < 4));
+		nivel = (int)nivel;
+	} while (nivel!=1 && nivel!= 2 && nivel!=3);
 		switch (nivel)
 		{
 		case 1:
@@ -176,7 +207,7 @@ void start()
 		}
 		
 		cout << "the dealer has " << compmoney << " bucks" << endl;
-		cout << "you have " << money << " bucks! how much do you want to bid?";
+		cout << "you have " << money << " bucks! how much do you want to bid?"<<endl;
 		cin >> bid;
 
 		money = money - bid;
@@ -192,7 +223,7 @@ void start()
 		compCards[0] = carti[2];
 		compCards[1] = carti[3];
 
-		showCards(playerCards);
+		showCards(playerCards,1);
 		int sumaPlayer = 0;
 		int l = 0;
 		//facem suma cartilor
@@ -213,13 +244,13 @@ void start()
 		cout << sumaPlayer << endl;
 		if (sumaPlayer == 21)
 		{
-			cout << "Ai castigat!\n";
+			cout << "You won this round!\n";
 			money = money + bid;
 		}
 		else
 		{
 			sumaPlayer = 0;
-			cout << "tragi o carte? (Y/N)\n";
+			cout << "Draw another card? (Y/N)\n";
 			cin >> c;
 			isUnder21 = true;
 			int pozUrmCarte = 2;
@@ -231,7 +262,7 @@ void start()
 				playerCards[pozUrmCarte] = carti[k];
 				k++;
 				pozUrmCarte++;
-				showCards(playerCards);
+				showCards(playerCards,1);
 
 				l = 0;
 				as = 0;
@@ -248,11 +279,11 @@ void start()
 					l++;
 				}
 				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
-				showCards(playerCards);
-				cout << "\ncsuma: " << sumaPlayer;
+				showCards(playerCards,1);
+				cout << "\n sum: " << sumaPlayer;
 				if (sumaPlayer == 21)
 				{
-					cout << "ai castigat!\n";
+					cout << "You won this round!\n";
 					money = money + bid;
 					isUnder21 = false;//ca sa se opreasca
 					//return
@@ -261,21 +292,20 @@ void start()
 				else if (sumaPlayer > 21)
 				{
 					isUnder21 = false;
-					cout << "ai pierdut!\n";
+					cout << "You lost this round!\n";
 					compmoney = compmoney + bid;
 					update(name, money);
 					//return
 				}
 				else
 				{
-					cout << "tragi o carte? (Y/N)\n";
+					cout << "Draw another card? (Y/N)\n";
 					cin >> c;
 				}
 
 			}
 			if (c == 'n' || c == 'N')
 			{
-				cout << "ai ajuns la nu";
 				//facem suma cartilor
 				sumaPlayer = 0;
 				l = 0;
@@ -298,7 +328,7 @@ void start()
 		//aici se incheie
 		if (money > 0 && compmoney>0)
 		{
-			cout << "mai joci?(Y/N)" << endl;
+			cout << "Play again?(Y/N)" << endl;
 			cin >> continua;
 			if (continua == 'n' || continua == 'N')
 			{
@@ -361,7 +391,7 @@ void registerLogin(char name[25])
 		{
 			cout << "welcome back, " << x << "! you have ";
 			getline(read, y);
-			cout << y << "bucks !";
+			cout << y << "bucks !\n";
 			write << y << endl;
 			money = std::stoi(y);
 			found = true;
@@ -369,7 +399,7 @@ void registerLogin(char name[25])
 	}
 	if (found == false)
 	{
-		cout << "you are new here. I just registered you. Now you have 1000 bucks";
+		cout << "You are new here. I just registered you. \nNow you have 1000 bucks";
 		money = 1000;
 		/*while (!read.eof())
 		{
@@ -411,12 +441,12 @@ void update(char name[25], int money)
 }
 void lose(int $compmoney, int bid)
 {
-	cout << "Ai pierdut!";
+	cout << "You won!";
 	compmoney = compmoney + bid;
 }
 void win(int $money, int $compmoney, int bid)
 {
-	cout << endl << "Ai castigat!";
+	cout << endl << "You lost!";
 	money = money + bid;
 
 }
@@ -462,8 +492,8 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		i++;
 	}
 	if (sumaComp + 10 <= 21 && asc == 1) sumaComp = sumaComp + 10;
-	cout << "cartile comp-----";
-	showCards(compCards);
+	cout << "Dealer's cards";
+	showCards(compCards, 0);
 	int k = 2;
 	switch (nivel)
 	{
@@ -558,38 +588,45 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		}
 
 	}
-	showCards(compCards);
-	cout << "totalul lui: " << sumaComp << endl;
+	showCards(compCards, 0);
+	cout << "Dealer's sum " << sumaComp << endl;
 	if (sumaComp > 21)
 	{
-		cout << "ai castigat!\n";
+		cout << "You won this round!\n";
 		money = money + bid;
 		update(name, money);
 	}
 	else if((sumaComp > sumaPlayer && sumaComp<21 && sumaPlayer<21) || sumaComp==21)
 	{
 		
-		cout << "ai pierdut!\n";
+		cout << "You lost this round!\n";
 		compmoney = compmoney + bid;
 		update(name, money);
 	}
 	else if (sumaComp == sumaPlayer && sumaComp < 21)
 	{
-		cout << "egal!\n";
+		cout << "push! Tie score\n";
 		money = money + bid/2;
 		compmoney = compmoney + bid / 2;
 	}
 	else
 	{
-		cout << "ai castigat!\n";
+		cout << "You won this round!\n";
 		money = money + bid;
 		update(name, money);
 	}
 }
-void showCards(int vector[52])
+void showCards(int vector[52], int player)
 {
 	int i = 0;
-	cout << "\ncartile tale sunt \n";
+	if(player==1)
+	{ 
+	cout << "Your cards are \n";
+	}
+	else
+	{
+		cout << "Dealer's cards are\n";
+	}
 	while (vector[i] != -1)
 	{
 		decodificare(vector[i]);
@@ -601,23 +638,23 @@ void showCards(int vector[52])
 
 void decodificare(int carte)
 {
-	if(carte/4<10)cout << carte / 4 + 1 << " de ";
-	else cout<< carte / 4 + 2 << " de ";
+	if(carte/4<10)cout << carte / 4 + 1 << " of ";
+	else cout<< carte / 4 + 2 << " of ";
 	switch (carte % 4)
 	{
 	case 0:
-		cout << " frunza ";
+		cout << " Spades ";
 		break;
 	case 1:
-		cout << " trefla ";
+		cout << " Clubs ";
 		break;
 	case 2:
-		cout << " inima ";
+		cout << " Hearts ";
 		break;
 	case 3:
-		cout << " romb ";
+		cout << " Diamond ";
 		break;
-	default: cout << "nu exista simbolul asta";
+	default: cout << "wtf";
 		break;
 	}
 
@@ -769,6 +806,22 @@ void updateHistory(string history)
 
 }
 
+void about()
+{
+	cout << endl;
+	cout << "  ---------------------------------------------  " << endl;
+	cout << " | By Anton Catalin     UAIC, Computer Science | " << endl;
+	cout << " |_Year I, Group B1____________________________| " << endl;
+	cout << " |                                             | " << endl;
+	cout << " |   Date: 1 / 7 / 2017                        | " << endl;
+	cout << " |---------------------------------------------| " << endl;
+	cout << " |   This program is free software. Although,  | " << endl;
+	cout << " |       I do not provide any warranty         | " << endl;
+	cout << " |            regarding the product            | " << endl;
+	cout << " |---------------------------------------------|  " << endl;
+	cout << " |                                             | " << endl;
+	cout << " |_____________________________________________| " << endl << endl; cout << endl;
+}
 int main()
 {
 	 int carti[52];
