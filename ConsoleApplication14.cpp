@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include<iostream>
 #include<string>
+#include<ctime>
 #include<string.h>
 #include<fstream>
 
@@ -11,6 +12,7 @@
 using namespace std;
 
 #define nrCarti 52
+#define hand 12
 struct jucator
 {
 	int bani;
@@ -27,9 +29,9 @@ void menu();
 void shuffle(unsigned int carti[52]);
 void help();
 void start();
-void showCards(int vector[7], int player);
+void showCards(int vector[hand], int player);
 void decodificare(int carte);
-void incheiere(int playerCards[11], int compCards[11], int carti[nrCarti], int sumaPlayer,char name[25], int nivel);
+void incheiere(int playerCards[11], int compCards[hand], int carti[nrCarti], int sumaPlayer,char name[25], int nivel);
 void win(int $money, int bid);
 void lose(int $compmoney, int bid);
 void registerLogin(char name[25]);
@@ -53,6 +55,7 @@ void shuffle(int carti[52])
 	int i, j,l, nrShuffles, aux,cartiAux[52],k;
 	nrShuffles = 3;
 
+	srand(clock());
 	for (i = 0; i <= nrCarti - 1; i++)
 		carti[i] = i;
 
@@ -60,7 +63,7 @@ void shuffle(int carti[52])
 		for (i = 0; i < nrCarti - 1; i++)
 		{
 			l = rand() % 51;
-
+			
 			aux = carti[i];
 			carti[i] = carti[l];
 			carti[l] = aux;
@@ -134,7 +137,7 @@ void help()
 	cout << " |   in a database so later you can show       | " << endl;
 	cout << " |   your Blackjack skills to your mom         | " << endl;
 	cout << " |---------------------------------------------|  " << endl;
-	cout << " |                                             | " << endl;
+	cout << " |    (start | help | score | about | exit)    | " << endl;
 	cout << " |_____________________________________________| " << endl << endl; cout << endl;
 
 
@@ -149,25 +152,18 @@ void menu()
 	if (strcmp(option, "help")==0)
 		{
 		help();
-
 		}
 	else if (strcmp(option, "start") == 0) start();
-
 	else if (strcmp(option, "exit") == 0) return;
 	else if (strcmp(option, "score") == 0) scoreboard();
-	else if (strcmp(option, "n") == 0 || strcmp(option, "N") == 0)
-	{
-		cout << "wtf" << endl;
-	}
 	else if (strcmp(option, "about") == 0) about();
 	else {
-		cout << "You are in the menu now! What do you wish to do?\n(start | help | score | exit)" << endl;
+		cout << "You are in the menu now! What do you wish to do?\n(start | help | score | about | exit)" << endl;
 		}
 	} while (strcmp(option, "exit") != 0);
 	
 	
 }
-
 void start()
 {
 	char name[25], c,continua='n';
@@ -279,7 +275,7 @@ void start()
 					l++;
 				}
 				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
-				showCards(playerCards,1);
+				//showCards(playerCards,1);
 				cout << "\n sum: " << sumaPlayer;
 				if (sumaPlayer == 21)
 				{
@@ -454,7 +450,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 {
 	int sumaComp;
 	
-	int asc;
+	int asc;//=1 if computer has an Ace
 
 	int i = 0;
 	/*
@@ -474,7 +470,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 	if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
 	showCards(playerCards);
 	*/
-	cout << "totalul tau: " << sumaPlayer << endl;
+	cout << "Your sum:  " << sumaPlayer << endl;
 
 	sumaComp = 0;
 
@@ -492,9 +488,9 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		i++;
 	}
 	if (sumaComp + 10 <= 21 && asc == 1) sumaComp = sumaComp + 10;
-	cout << "Dealer's cards";
 	showCards(compCards, 0);
-	int k = 2;
+	int k = 8;
+	i = 2;
 	switch (nivel)
 	{
 	case 1://easy
@@ -516,6 +512,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		
 		while (sumaComp < 17)
 		{
+			
 			compCards[i] = carti[k];
 			if (compCards[i] / 4 < 10)
 				sumaComp = sumaComp + compCards[i] / 4 + 1;
@@ -616,7 +613,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		update(name, money);
 	}
 }
-void showCards(int vector[52], int player)
+void showCards(int vector[hand], int player)
 {
 	int i = 0;
 	if(player==1)
@@ -638,8 +635,26 @@ void showCards(int vector[52], int player)
 
 void decodificare(int carte)
 {
-	if(carte/4<10)cout << carte / 4 + 1 << " of ";
-	else cout<< carte / 4 + 2 << " of ";
+	if(carte/4<10 && carte/4>0)cout << carte / 4 + 1 << " of ";
+	else
+	{
+
+		switch (carte / 4)
+		{
+		case 0: cout << "Ace ";
+			break;
+		case 10: cout << "J ";
+			break;
+		case 11: cout << "Q ";
+			break;
+		case 12: cout << "K ";
+			break;
+		default: cout << "wtf ";
+			break;
+		}
+		cout << "of ";
+		
+	}
 	switch (carte % 4)
 	{
 	case 0:
