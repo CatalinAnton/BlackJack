@@ -29,9 +29,10 @@ void menu();
 void shuffle(unsigned int carti[52]);
 void help();
 void start();
+void about();
 void showCards(int vector[hand], int player);
 void decodificare(int carte);
-void incheiere(int playerCards[11], int compCards[hand], int carti[nrCarti], int sumaPlayer,char name[25], int nivel);
+void incheiere(int playerCards[hand], int compCards[hand], int carti[nrCarti], int sumaPlayer,char name[25], int nivel);
 void win(int $money, int bid);
 void lose(int $compmoney, int bid);
 void registerLogin(char name[25]);
@@ -42,7 +43,8 @@ void scoreboard();
 void quicksort(jucator *players, int left, int right);
 void swap(int i, int j, jucator *a);
 void updateHistory(string data);
-void about();
+void processUsedCards(int playerCards[hand], int compCards[hand]);
+
 
 int money = 1000;
 int compmoney = 1000;
@@ -253,7 +255,6 @@ void start()
 			k = 4;
 			while ((c == 'y' || c == 'Y') && isUnder21 == true)
 			{
-				cout << sumaPlayer << endl;
 				//se mai pune o carte in mana jucatorului
 				playerCards[pozUrmCarte] = carti[k];
 				k++;
@@ -284,6 +285,8 @@ void start()
 					isUnder21 = false;//ca sa se opreasca
 					//return
 					update(name, money);
+
+					processUsedCards(playerCards, compCards);
 				}
 				else if (sumaPlayer > 21)
 				{
@@ -291,6 +294,7 @@ void start()
 					cout << "You lost this round!\n";
 					compmoney = compmoney + bid;
 					update(name, money);
+					processUsedCards(playerCards, compCards);
 					//return
 				}
 				else
@@ -337,6 +341,8 @@ void start()
 				cout << history;
 				updateHistory(history);
 				history = " ";
+
+				processUsedCards(playerCards, compCards);
 				return;
 			}
 		}
@@ -352,7 +358,8 @@ void start()
 
 			updateHistory(history);
 			history = " ";
-			//strcat(history, nivel);
+
+			processUsedCards(playerCards, compCards);
 			return;
 			}
 		else
@@ -360,13 +367,15 @@ void start()
 			continua = 'n';
 			cout << "Congratulations! You won! The computer has no money left" << endl;
 			history = history + name;
-			history = history + "Won! The computer has no money left. Bucks now:";
+			history = history + " Won! The computer has no money left. Bucks now: ";
 			history = history + std::to_string(money);
 			history = history + "difficulty: ";
 			history = history + std::to_string(nivel);
 
 			updateHistory(history);
 			history = " ";
+
+			processUsedCards(playerCards, compCards);
 			
 		}
 	} while (continua == 'y' || continua == 'Y');
@@ -592,6 +601,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		cout << "You won this round!\n";
 		money = money + bid;
 		update(name, money);
+		processUsedCards(playerCards, compCards);
 	}
 	else if((sumaComp > sumaPlayer && sumaComp<21 && sumaPlayer<21) || sumaComp==21)
 	{
@@ -599,18 +609,21 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		cout << "You lost this round!\n";
 		compmoney = compmoney + bid;
 		update(name, money);
+		processUsedCards(playerCards, compCards);
 	}
 	else if (sumaComp == sumaPlayer && sumaComp < 21)
 	{
 		cout << "push! Tie score\n";
 		money = money + bid/2;
 		compmoney = compmoney + bid / 2;
+		processUsedCards(playerCards, compCards);
 	}
 	else
 	{
 		cout << "You won this round!\n";
 		money = money + bid;
 		update(name, money);
+		processUsedCards(playerCards, compCards);
 	}
 }
 void showCards(int vector[hand], int player)
@@ -836,6 +849,53 @@ void about()
 	cout << " |---------------------------------------------|  " << endl;
 	cout << " |                                             | " << endl;
 	cout << " |_____________________________________________| " << endl << endl; cout << endl;
+}
+
+void processUsedCards(int playerCards[hand], int compCards[hand])
+{
+	int i = 0, j = 0,k, frecventa[nrCarti];
+
+	for (k = 0; k <= nrCarti - 1; k++)
+	{
+		frecventa[k] = 0;
+	}
+	
+	
+	while (playerCards[i] != -1)
+	{
+		frecventa[playerCards[i]]++;
+		i++;
+	}
+	while (compCards[j] != -1)
+	{
+		frecventa[compCards[j]]++;
+		j++;
+	}
+
+	ifstream fin ("usedCards.txt");
+	ofstream fout("tempUsedCards.txt");
+	int fileData;
+
+	while (!fin.eof())
+	{
+		fin >> fileData;
+		fout << fileData;
+		if (frecventa[fileData] == 1)
+		{
+			fin >> fileData;
+			fileData++;
+			fout << " " << fileData << endl;
+		}
+		else
+		{
+			fin >> fileData;
+			fout << " " << fileData<<" "<<endl;
+		}
+	}
+	fin.close();
+	fout.close();
+	remove("usedCards.txt");
+	rename("tempUsedCards.txt", "usedCards.txt");
 }
 int main()
 {
