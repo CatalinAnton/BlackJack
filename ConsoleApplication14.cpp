@@ -7,23 +7,12 @@
 #include<ctime>
 #include<string.h>
 #include<fstream>
+#include"structs.h"
 
-
-using namespace std;
 
 #define nrCarti 52
 #define hand 12
-struct jucator
-{
-	int bani;
-	string name;
-};
-struct node
-{
-	int money;
-	string name;
-	node *next;
-};
+
 
 void menu();
 void shuffle(unsigned int carti[52]);
@@ -168,19 +157,30 @@ void menu()
 }
 void start()
 {
-	char name[25], c,continua='n';
-	int carti[52], k = 4,as,nivel=1;
+	char name[25], c, continua = 'n';
+	int carti[52], k = 4, as, nivel = 1;
 	int playerCards[6], compCards[6];
 	char *data = " ";
 	cout << endl << "Give us your name!" << endl;
 	cin.getline(name, 25);
 	registerLogin(name);
-	do
+	if (money == 0)
 	{
-		cout << "Choose the difficulty level! (1-easy | 2-medium | 3-hard)" << endl;
-		cin >> nivel;
-		nivel = (int)nivel;
-	} while (nivel!=1 && nivel!= 2 && nivel!=3);
+		cout << "I see you don't like to lose, so here are another 200 bucks. You are welcome :)\n";
+		money = 200;
+	}
+
+	cout << "Choose the difficulty level! (1-easy | 2-medium | 3-hard)" << endl;
+	cin >> nivel;
+	while (nivel != 1 && nivel != 2 && nivel != 3 || std::cin.fail())
+		{
+			
+				std::cin.clear();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cout << "Bad entry. Choose the difficulty level! (1-easy | 2-medium | 3-hard) \n";
+				std::cin >> nivel;
+			
+	    }
 		switch (nivel)
 		{
 		case 1:
@@ -205,9 +205,17 @@ void start()
 		}
 		
 		cout << "the dealer has " << compmoney << " bucks" << endl;
-		cout << "you have " << money << " bucks! how much do you want to bid?"<<endl;
-		cin >> bid;
+		
+			cout << "you have " << money << " bucks! how much do you want to bid?" << endl;
+			cin >> bid;
 
+			while (!(bid > 0 && bid <= money && bid<=compmoney) || std::cin.fail())
+			{
+				std::cin.clear();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cout << "Bad entry.  Enter a number between 1 and your current available amount of money: ";
+				std::cin >> bid;
+			}
 		money = money - bid;
 		compmoney = compmoney - bid;
 
@@ -338,7 +346,7 @@ void start()
 				history = history + std::to_string(money);
 				history = history + " difficulty: ";
 				history = history + std::to_string(nivel);
-				cout << history;
+				cout << history<<endl;
 				updateHistory(history);
 				history = " ";
 
@@ -351,7 +359,7 @@ void start()
 			//concatenare
 			cout << "sorry, you have no money left :<"<<endl;
 			history = history + name;
-			history = history + "lost! No money left. Bucks now:";
+			history = history + " lost! No money left. Bucks now: ";
 			history= history + std::to_string(money);
 			history = history + "difficulty: ";
 			history = history + std::to_string(nivel);
@@ -404,7 +412,7 @@ void registerLogin(char name[25])
 	}
 	if (found == false)
 	{
-		cout << "You are new here. I just registered you. \nNow you have 1000 bucks";
+		cout << "You are new here. I just registered you. \nNow you have 1000 bucks. ";
 		money = 1000;
 		/*while (!read.eof())
 		{
@@ -544,7 +552,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 					if (compCards[i] / 4 == 0) magic = 1;
 				}
 				else sumaComp = sumaComp + 10;
-				if (sumaComp + 10 < 21 && magic == 1)
+				if (sumaComp + 10 <= 21 && magic == 1)
 				{
 					sumaComp = sumaComp + 10;
 				}
@@ -575,7 +583,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 		}
 		else
 		{
-			while (sumaPlayer > sumaComp)
+			while (sumaPlayer >= sumaComp)
 			{
 				compCards[i] = carti[k];
 				if (compCards[i] / 4 < 10)
@@ -584,7 +592,7 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 					if (compCards[i] / 4 == 0) magic = 1;
 				}
 				else sumaComp = sumaComp + 10;
-				if (sumaComp + 10 < 21 && magic == 1)
+				if (sumaComp + 10 <= 21 && magic == 1)
 				{
 					sumaComp = sumaComp + 10;
 				}
@@ -815,10 +823,11 @@ void quicksort(jucator *players, int left, int right) {
 	}
 }
 
-ifstream reader("gamesHistory.txt");
-ofstream writer("tempgames.txt");
+
 void updateHistory(string history)
 {
+	ifstream reader("gamesHistory.txt");
+	ofstream writer("tempGames.txt");
 	string y;
 	while (!reader.eof())
 	{
