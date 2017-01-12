@@ -33,8 +33,9 @@ void quicksort(jucator *players, int left, int right);
 void swap(int i, int j, jucator *a);
 void updateHistory(string data);
 void processUsedCards(int playerCards[hand], int compCards[hand]);
-
-
+int handSum(int playerCards[hand], int sumaPlayer);
+void showFrequency();
+void preorder(btree *head);
 int money = 1000;
 int compmoney = 1000;
 int bid;
@@ -44,16 +45,17 @@ string history=" ";
 void shuffle(int carti[52])
 {
 	int i, j,l, nrShuffles, aux,cartiAux[52],k;
-	nrShuffles = 3;
+	
 
 	srand(clock());
+	nrShuffles = rand() % 3 + 1;
 	for (i = 0; i <= nrCarti - 1; i++)
 		carti[i] = i;
 
 	for (j = 1; j<nrShuffles; j++)
 		for (i = 0; i < nrCarti - 1; i++)
 		{
-			l = rand() % 51;
+			l = rand() % 52;
 			
 			aux = carti[i];
 			carti[i] = carti[l];
@@ -222,7 +224,6 @@ void start()
 		bid = bid * 2;
 
 		shuffle(carti);
-		shuffle(carti);
 		//init carti
 		playerCards[0] = carti[0];
 		playerCards[1] = carti[1];
@@ -232,22 +233,9 @@ void start()
 		showCards(playerCards,1);
 		int sumaPlayer = 0;
 		int l = 0;
-		//facem suma cartilor
-		l = 0;
-		as = 0;
-		while (playerCards[l] != -1)//face suma
-		{
-			if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
-			else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
-			else
-			{
-				as = 1;
-				sumaPlayer++;
-			}
-			l++;
-		}
-		if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
-		cout << sumaPlayer << endl;
+		
+		sumaPlayer = sumaPlayer + handSum(playerCards, sumaPlayer);
+
 		if (sumaPlayer == 21)
 		{
 			cout << "You won this round!\n";
@@ -272,20 +260,8 @@ void start()
 				l = 0;
 				as = 0;
 				sumaPlayer = 0;//ultima modificare
-				while (playerCards[l] != -1)//face suma
-				{
-					if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
-					else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
-					else
-					{
-						as = 1;
-						sumaPlayer++;
-					}
-					l++;
-				}
-				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
-				//showCards(playerCards,1);
-				cout << "\n sum: " << sumaPlayer;
+				sumaPlayer = sumaPlayer + handSum(playerCards, sumaPlayer);
+				
 				if (sumaPlayer == 21)
 				{
 					cout << "You won this round!\n";
@@ -316,20 +292,8 @@ void start()
 			{
 				//facem suma cartilor
 				sumaPlayer = 0;
-				l = 0;
-				as = 0;
-				while (playerCards[l] != -1)//face suma
-				{
-					if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
-					else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
-					else
-					{
-						as = 1;
-						sumaPlayer++;
-					}
-					l++;
-				}
-				if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
+				sumaPlayer = sumaPlayer + handSum(playerCards, sumaPlayer);
+				
 				incheiere(playerCards, compCards, carti,sumaPlayer,name,nivel);
 			}
 		}
@@ -361,7 +325,7 @@ void start()
 			history = history + name;
 			history = history + " lost! No money left. Bucks now: ";
 			history= history + std::to_string(money);
-			history = history + "difficulty: ";
+			history = history + " difficulty: ";
 			history = history + std::to_string(nivel);
 
 			updateHistory(history);
@@ -377,7 +341,7 @@ void start()
 			history = history + name;
 			history = history + " Won! The computer has no money left. Bucks now: ";
 			history = history + std::to_string(money);
-			history = history + "difficulty: ";
+			history = history + " difficulty: ";
 			history = history + std::to_string(nivel);
 
 			updateHistory(history);
@@ -467,44 +431,14 @@ void incheiere(int playerCards[11], int compCards[11],int carti[52], int sumaPla
 {
 	int sumaComp;
 	
-	int asc;//=1 if computer has an Ace
 
 	int i = 0;
-	/*
-	int l = 0;
-	int as = 0;
-	while (playerCards[l] != -1)//face suma
-	{
-		if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
-		else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
-		else
-		{
-			as = 1;
-			sumaPlayer++;
-		}
-		l++;
-	}
-	if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
-	showCards(playerCards);
-	*/
+	
 	cout << "Your sum:  " << sumaPlayer << endl;
 
 	sumaComp = 0;
-
-	i = 0;
-	asc = 0;
-	while (compCards[i] != -1)
-	{
-		if (compCards[i] / 4 >= 10)sumaComp = sumaComp + 10;
-		else if (compCards[i] / 4 != 0)sumaComp = sumaComp + compCards[i] / 4 + 1;
-		else
-		{
-			asc = 1;
-			sumaComp++;
-		}
-		i++;
-	}
-	if (sumaComp + 10 <= 21 && asc == 1) sumaComp = sumaComp + 10;
+	sumaComp = handSum(compCards, sumaComp);
+	
 	showCards(compCards, 0);
 	int k = 8;
 	i = 2;
@@ -688,7 +622,7 @@ void decodificare(int carte)
 		cout << " Hearts ";
 		break;
 	case 3:
-		cout << " Diamond ";
+		cout << " Diamonds ";
 		break;
 	default: cout << "wtf";
 		break;
@@ -755,6 +689,7 @@ void scoreboard()
 	}
 
 	showList(head);
+	cout << " (start | help | score | about | exit)" << endl;
 }
 void addList(node *head, jucator player)
 {
@@ -856,7 +791,7 @@ void about()
 	cout << " |       I do not provide any warranty         | " << endl;
 	cout << " |            regarding the product            | " << endl;
 	cout << " |---------------------------------------------|  " << endl;
-	cout << " |                                             | " << endl;
+	cout << " |    (start | help | score | about | exit)    | " << endl;
 	cout << " |_____________________________________________| " << endl << endl; cout << endl;
 }
 
@@ -864,7 +799,7 @@ void processUsedCards(int playerCards[hand], int compCards[hand])
 {
 	int i = 0, j = 0,k, frecventa[nrCarti];
 
-	for (k = 0; k <= nrCarti - 1; k++)
+	for (k = 0; k <= nrCarti - 1; k++)	//init
 	{
 		frecventa[k] = 0;
 	}
@@ -884,8 +819,8 @@ void processUsedCards(int playerCards[hand], int compCards[hand])
 	ifstream fin ("usedCards.txt");
 	ofstream fout("tempUsedCards.txt");
 	int fileData;
-
-	while (!fin.eof())
+	int c = nrCarti;
+	while (c>0)
 	{
 		fin >> fileData;
 		fout << fileData;
@@ -898,23 +833,72 @@ void processUsedCards(int playerCards[hand], int compCards[hand])
 		else
 		{
 			fin >> fileData;
-			fout << " " << fileData<<" "<<endl;
+			fout << " " << fileData << endl;
 		}
+		c--;
 	}
 	fin.close();
 	fout.close();
 	remove("usedCards.txt");
 	rename("tempUsedCards.txt", "usedCards.txt");
 }
+
+int handSum(int playerCards[hand], int sumaPlayer)
+{
+	int l, as;
+	l = 0;
+	as = 0;
+	while (playerCards[l] != -1)//face suma
+	{
+		if (playerCards[l] / 4 >= 10)sumaPlayer = sumaPlayer + 10;
+		else if (playerCards[l] / 4 != 0)sumaPlayer = sumaPlayer + playerCards[l] / 4 + 1;
+		else
+		{
+			as = 1;
+			sumaPlayer++;
+		}
+		l++;
+	}
+	if (sumaPlayer + 10 <= 21 && as == 1) sumaPlayer = sumaPlayer + 10;
+	cout << sumaPlayer << endl;
+	return sumaPlayer;
+}
+
+void showFrequency()
+{
+	ifstream citeste("usedCards.txt");
+	int card;
+	int frequency;
+
+	btree *head;
+	head = new btree;
+	citeste >> card;
+	citeste >> frequency;
+	head = initTree(head, frequency, card);
+
+	while (citeste>>card>>frequency)
+	{
+		head = insertTree(head, frequency, card);
+	}
+	preorder(head);
+	citeste.close();
+}
+
+void preorder(btree *head)
+{
+	if (head != NULL)
+	{
+		cout << head->frequency << " ";
+		decodificare(head->card);
+		preorder(head->left);	
+		preorder(head->right);	
+	}
+}
 int main()
 {
 	 int carti[52];
 	shuffle(carti);
-	int i;
-
-	for (i = 0; i < nrCarti; i++)
-		cout << carti[i] << " ";
-	cout << endl;
+	showFrequency();
 	cout << "This is BlackJack! You are in the menu now" << endl << "type help for more information!" << endl;
 	menu();
 	system("pause");

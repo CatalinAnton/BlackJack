@@ -1,19 +1,13 @@
 cata
-33
+3
 Laurentiu
 936
 dan
 3143
-kk
-942
 ion
 1037
 Luan
 1333
-fdsfdsfds
-945
-gfdgfgd
-1088
 Robert Ojoc
 4000
 Ukulele
@@ -22,6 +16,15 @@ Mihai
 990
 Klaus Iohannis
 778
-4
+!@#$%
 1000
-
+Keith
+909
+Croissant
+0
+Alexandrina
+0
+Alex
+0
+Spongebob
+819
