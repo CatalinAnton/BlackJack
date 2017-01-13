@@ -28,8 +28,6 @@
  cata Won! The computer has no money left. Bucks now: 600 difficulty: 3
  cata lost! No money left. Bucks now: 0 difficulty: 3
  cata lost! No money left. Bucks now: 0 difficulty: 3
- cata left the game. Bucks now: 206 difficulty: -1
- cata left the game. Bucks now: 228 difficulty: -1
  cata left the game. Bucks now: 228 difficulty: 3
  cata left the game. Bucks now: 206 difficulty: 3
  cata left the game. Bucks now: 208 difficulty: 3
